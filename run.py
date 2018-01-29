@@ -1,6 +1,6 @@
 from flask import Flask, request
 from twilio import twiml
-
+from yweather import yweather
 
 app = Flask(__smschat__)
 
@@ -20,3 +20,54 @@ if __smschat__ == '__main__':
     app.run()
 
 
+# formulate a response based on message input.
+def getReply(message):
+
+    # Make the message lower case and without spaces on the end for easier handling
+    message = message.lower().strip()
+    # This is the variable where we will store our response
+    answer = ""
+
+    if "weather" in message:
+        message = removeHead(message, "weather")
+        local_iden = client.fetch_woeid(message)
+
+        Try:
+         # Get the weather from certain plain
+            answer = client.fetch_weather(local_iden)
+        except:
+            # handle errors
+            answer = "Request was not found using yweather. Enter your location as City, State or City, Country."
+
+    # check to see if the keyword "wiki" is in the message?
+    elif "wiki" in message:
+        # strip "wiki" from the message
+        message = removeHead(message, "wiki")
+
+        # Get the wikipedia summary for the request
+        Try:
+         # Get the summary off wikipedia
+            answer = wikipedia.summary(message)
+        except:
+            # handle errors
+            answer = "Request was not found using wiki. Be more specific?"
+
+    # error handling prompt
+    else:
+        answer = "\n Welcome! These are the commands you may use: \nWIKI \"wikipedia request\"\nWEATHER \"place\""
+
+    # shortening message due to constraints
+    if len(answer) > 1500:
+        answer = answer[0:1500] + "..."
+
+    # return the formulated answer
+    return answer
+
+# Format text input with this function
+def removeHead(fromThis, removeThis):
+    if fromThis.endswith(removeThis):
+        fromThis = fromThis[:-len(removeThis)].strip()
+    elif fromThis.startswith(removeThis):
+        fromThis = fromThis[len(removeThis):].strip()
+
+    return fromThis
