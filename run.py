@@ -2,21 +2,7 @@ from flask import Flask, request
 from twilio.twiml.messaging_response import Message, MessagingResponse
 import yweather
 
-app = Flask(__name__)
-
-@app.route('/', methods=['POST'])
-def sms():
-
-    message_body = request.form['Body']
-    resp = MessagingResponse()
-
-    replyText = getReply(message_body)
-    resp.message('Hi\n\n' + replyText )
-    return str(resp)
-
-if __name__ == '__main__':
-    app.run()
-
+client = yweather.Client()
 
 # formulate a response based on message input.
 def getReply(message):
@@ -69,3 +55,18 @@ def removeHead(fromThis, removeThis):
         fromThis = fromThis[len(removeThis):].strip()
 
     return fromThis
+
+app = Flask(__name__)
+
+@app.route('/', methods=['POST'])
+def sms():
+
+    message_body = request.form['Body']
+    resp = MessagingResponse()
+
+    replyText = getReply(message_body)
+    resp.message('Hi\n\n' + replyText )
+    return str(resp)
+
+if __name__ == '__main__':
+    app.run()
