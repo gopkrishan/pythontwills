@@ -1,22 +1,20 @@
 from flask import Flask, request
 from twilio import twiml
-from yweather import yweather
+import yweather
 
-app = Flask(__smschat__)
+app = Flask(__name__)
 
 @app.route('/', methods=['POST'])
 def sms():
 
     message_body = request.form['Body']
-
-    resp = twiml.Response()
+    resp = MessagingResponse()
 
     replyText = getReply(message_body)
-
     resp.message('Hi\n\n' + replyText )
     return str(resp)
 
-if __smschat__ == '__main__':
+if __name__ == '__main__':
     app.run()
 
 
@@ -32,7 +30,7 @@ def getReply(message):
         message = removeHead(message, "weather")
         local_iden = client.fetch_woeid(message)
 
-        Try:
+        try:
          # Get the weather from certain plain
             answer = client.fetch_weather(local_iden)
         except:
@@ -45,7 +43,7 @@ def getReply(message):
         message = removeHead(message, "wiki")
 
         # Get the wikipedia summary for the request
-        Try:
+        try:
          # Get the summary off wikipedia
             answer = wikipedia.summary(message)
         except:
