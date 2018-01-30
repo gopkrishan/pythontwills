@@ -1,24 +1,37 @@
 from flask import Flask, request
 from twilio.twiml.messaging_response import Message, MessagingResponse
 import yweather
+import wikipedia
 
 client = yweather.Client()
+
+
+# Format text input with this function
+def removeHead(fromThis, removeThis):
+    if fromThis.endswith(removeThis):
+        fromThis = fromThis[:-len(removeThis)].strip()
+    elif fromThis.startswith(removeThis):
+        fromThis = fromThis[len(removeThis):].strip()
+
+    return fromThis
 
 # formulate a response based on message input.
 def getReply(message):
 
     # Make the message lower case and without spaces on the end for easier handling
-    message = message.lower().strip()
+    message = message.lower().strip().encode('ascii','ignore')
     # This is the variable where we will store our response
     answer = ""
 
     if "weather" in message:
         message = removeHead(message, "weather")
         local_iden = client.fetch_woeid(message)
+        weather = client.fetch_weather(local_iden)
 
         try:
          # Get the weather from certain plain
-            answer = client.fetch_weather(local_iden)
+
+            answer = weather["condition"]["text"]
         except:
             # handle errors
             answer = "Request was not found using yweather. Enter your location as City, State or City, Country."
@@ -27,7 +40,6 @@ def getReply(message):
     elif "wiki" in message:
         # strip "wiki" from the message
         message = removeHead(message, "wiki")
-
         # Get the wikipedia summary for the request
         try:
          # Get the summary off wikipedia
@@ -46,15 +58,6 @@ def getReply(message):
 
     # return the formulated answer
     return answer
-
-# Format text input with this function
-def removeHead(fromThis, removeThis):
-    if fromThis.endswith(removeThis):
-        fromThis = fromThis[:-len(removeThis)].strip()
-    elif fromThis.startswith(removeThis):
-        fromThis = fromThis[len(removeThis):].strip()
-
-    return fromThis
 
 app = Flask(__name__)
 
